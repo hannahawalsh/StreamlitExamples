@@ -1,0 +1,49 @@
+# Help
+
+## Random Forest
+A decision tree is a predictive model that uses a series of yes/no decisions
+to come to a final conclusion. You can think of it as a game of 20
+questions:  
+Is feature 1 True? If yes, is feature 2 > 4? And so on.  
+    
+A random forest classifier is an algorithm that classifies data by constructing
+many decision trees and taking their average prediction. Each individual tree 
+in the "forest" does not have to be perfect since the decision does not come 
+from just one tree.  
+  
+Random forests are a good way to prevent memorizing the training data set 
+(also known as _overfitting_). If the training set is memorized, the model 
+will not be able to predict well for unseen data.
+
+
+## Hyperparameters
+A hyperparameter is a value that is used in a machine learning model that
+controls how a certain part of the calculation is performed. Hyperparameters 
+are set by the programmer and can be changed to better model performance.  
+Here are the hyperparameters you can change in this app:
+
+#### Number of Trees in Forest
+As described above, each random forest is comprised of multiple decision trees.
+This parameter is how many trees are calculated. Too few trees can lead to
+poor performance but too many trees will cost computation time and
+may actually decrease performance.
+
+#### Maximum Tree Depth
+This is the maximum number of decisions you let each tree make. Too few 
+levels and the algorithm can't make a good prediction. Too many levels and you are just memorizing information.
+
+#### Minimum Samples per Split
+This is the fewest number of data points at any given node needed for a tree
+to make a decision. The minimum is 2, which means the tree assigns each of
+those 2 points their own answer.
+
+#### Feature Split Type
+This corresponds to how many features to consider when looking for the best 
+split. This can help overfitting by not letting the decision tree look at all 
+possible splits. When data has a large number of features, this can also speed 
+up the training process.
+
+#### Balance class weight
+When doing classification, most often there are not equal number of records for
+each of the classes. By adding this parameter, the model automatically 
+adjusts the weights of each class proportionally to class frequency.
