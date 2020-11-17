@@ -22,6 +22,12 @@ def create_grouped_kde(df, col, target=None, by_class=True, size=175,
         Whether to plot data by class 
     size : integer 
         Size (width & height) of the returned plot 
+    ylabel : string 
+    xlabel : string 
+    
+    Returns 
+    -------
+    Altair chart 
     """
     ylabel = ylabel if ylabel is not None else "density"
     xlabel = xlabel if xlabel is not None else col
@@ -58,6 +64,22 @@ def create_grouped_kde(df, col, target=None, by_class=True, size=175,
 
 
 def create_distribution_figure(df, by_class, size=175):
+    """ 
+    Create an altair chart for each column in a dataframe. Optionally, plot 
+    distribution by a target class. 
+    
+    Parameters 
+    ----------
+    df : pandas DataFrame 
+    by_class : boolean
+        Whether to plot data by class 
+    size : integer 
+        Size (width & height) of the returned plot 
+    
+    Returns 
+    -------
+    Altair chart 
+    """
     plot_rows = alt.vconcat(data=df)
     n_cols = 3
     n_rows = (len(df.columns) - 1) // n_cols + 1
@@ -87,11 +109,28 @@ def create_distribution_figure(df, by_class, size=175):
         ).configure_title(fontSize=14, anchor="middle"
         ).configure_axis(grid=False, labelAngle=0
         )
-    
     return chart
 
 
 def create_comparison_figure(df, cols, by_class, size=100):
+    """ 
+    Create an altair chart that compairs up to 4 variables pairwise (immitates
+    seaborn's pairplot).
+    
+    Parameters 
+    ----------
+    df : pandas DataFrame 
+    cols : list
+        The columns of df to be plotted 
+    by_class : boolean, default True 
+        Whether to plot data by class 
+    size : integer 
+        Size (width & height) of the returned plot 
+    
+    Returns 
+    -------
+    Altair chart 
+    """
     plot_rows = alt.vconcat(data=df)
     labels = df["target"].unique()
     colors = ["DarkMagenta", "MediumOrchid", "RebeccaPurple"]
@@ -127,13 +166,28 @@ def create_comparison_figure(df, cols, by_class, size=100):
 
 
 def create_corrolation_plot(data):
+    """ 
+    Create an altair chart that lists the correlation between variables and is 
+    colored according to value. 
+    
+    Parameters 
+    ----------
+    data : pandas DataFrame 
+    
+    Returns 
+    -------
+    Altair chart 
+    """
     corr = data.corr().reset_index().melt(id_vars="index")
     corr.columns = ["Variable 1", "Variable 2", "corr_values"]
     corr["Correlation"] = corr.corr_values.round(3)
     
+    # Base chart 
     cht = alt.Chart(corr).encode(
             x="Variable 1:N", y="Variable 2:N"
         ).properties(title="Correlation Plot", width=700, height=700)
+    
+    # Text overlay 
     txt = cht.mark_text().encode(
             text="Correlation", 
             color=alt.condition(
@@ -141,6 +195,8 @@ def create_corrolation_plot(data):
                 if_true=alt.value('white'),
                 if_false=alt.value('black')
         ))
+    
+    # Colored boxes 
     rct = cht.mark_rect().encode(
             color=alt.Color("corr_values:Q", scale=alt.Scale(scheme="purples"),
                             legend=None),
