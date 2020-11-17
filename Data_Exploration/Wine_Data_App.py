@@ -6,7 +6,6 @@ It uses the built-in sklearn wine data set.
 ### Imports
 import streamlit as st
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_wine
 
@@ -158,7 +157,7 @@ def main():
     if compare_cols:
         comparison_plot.altair_chart(create_comparison_figure(plot_df,
                                      compare_cols, by_class, size=120))
-    
+
 
 
 ### Cached functions
@@ -245,7 +244,4 @@ if __name__ == "__main__":
     ### Set the color palette
     colors = ["DarkMagenta", "MediumOrchid", "RebeccaPurple", "DarkOrchid",
               "DarkViolet", "BlueViolet", "Indigo", "MediumPurple", "Purple"]
-    wine_palette = sns.color_palette(colors)
-    sns.set_palette(wine_palette)
-
     main()
