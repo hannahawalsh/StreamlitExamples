@@ -14,11 +14,7 @@ SEED = 101
 
 
 def main():
-    ### Load in cached data and variables
-    data = load_data()  
-    cached = cached_values()
-    model_dict = get_models()
-
+    
     ### Set up our side bar
     st.sidebar.title("Model Hyperparameters")
     help_button = st.sidebar.button(label="Help")
@@ -45,6 +41,11 @@ def main():
     # Add a free stock photo 
     pth = "https://image.freepik.com/free-photo/umbrella-rain_7186-1070.jpg"
     umbrella = st.image(pth, use_column_width=True)
+    
+    # Load in cached data and variables
+    data = load_data()  
+    cached = cached_values()
+    model_dict = get_models()    
     
     # Add in placeholders
     close_help_spot = st.empty()
@@ -158,11 +159,23 @@ def main():
         past.dataframe(past_metrics)
     
     
-@st.cache()
+@st.cache(suppress_st_warning=True, show_spinner=False)
 def load_data():
     # Load the data from the sklearn package
-    path = os.path.join("WeatherData", "cleaned_weather.csv")
-    data = pd.read_csv(path)
+    data_path = os.path.join("WeatherData", "cleaned_weather.csv")
+    if not os.path.exists(data_path):
+        original_path = os.path.join("WeatherData", "weatherAUS.csv")
+        if not os.path.exists(original_path):
+            st.error("Please download the Australian Weather data from "
+                     "https://www.kaggle.com/jsphyg/weather-dataset-rattle-"
+                     "package")
+            st.stop()
+        else:
+            st.spinner("Cleaning Australian Weather Data")
+            os.chdir("WeatherData")
+            import clean_aus_weather
+            os.chdir("..")
+    data = pd.read_csv(data_path)
     y = data.pop("RainTomorrow")
     
     # Split it into training and testing data
@@ -188,6 +201,7 @@ def cached_values():
               "past_metrics": pd.DataFrame(index=metric_idx),
               }
     return values
+    
     
 @st.cache(allow_output_mutation=True)
 def get_models():
