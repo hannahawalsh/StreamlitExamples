@@ -6,7 +6,6 @@ It uses the built-in sklearn wine data set.
 ### Imports
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.datasets import load_wine
 
 from AppPlotFunctions import *
