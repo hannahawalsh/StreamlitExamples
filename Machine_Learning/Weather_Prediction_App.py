@@ -1,6 +1,6 @@
 """
-This is an example of the dashboarding tool Streamlit.
-It uses the sklearn red wine dataset to train a tree classifier.
+This is an example of using Streamlit for machine learning.
+It uses the Australian Rain data set from Kaggle to train random forests. 
 """
 
 ### Imports
@@ -60,18 +60,15 @@ def main():
     plus_rows = b2.button("More Rows")
     if not cached["display_data"]:
         cached["display_data"]["df"] = pd.concat([data["y_train"].head(5),
-                                                 data["X_train"].head(5)], 
-                                                 axis=1).reset_index(drop=True)
+            data["X_train"].head(5)], axis=1).reset_index(drop=True)
     elif minus_rows:
         L = max(1, len(cached["display_data"]["df"]) - 1)
         cached["display_data"]["df"] = pd.concat([data["y_train"].head(L),
-                                                 data["X_train"].head(L)],
-                                                 axis=1).reset_index(drop=True)
+            data["X_train"].head(L)], axis=1).reset_index(drop=True)
     elif plus_rows:
         L = len(cached["display_data"]["df"]) + 1
         cached["display_data"]["df"] = pd.concat([data["y_train"].head(L),
-                                                 data["X_train"].head(L)], 
-                                                 axis=1).reset_index(drop=True)
+            data["X_train"].head(L)], axis=1).reset_index(drop=True)
     sty_df = cached["display_data"]["df"].style.set_precision(2)
     table_spot.table(sty_df)
 
@@ -87,7 +84,7 @@ def main():
     else:
         close_help_spot.empty()
     
-    # train a random forest 
+    # Train a random forest 
     if start_button:
         # Format inputs as propert sklearn parameters 
         mxf_dict = {"Square Root": "sqrt", "Log (Base 2)": "log2", 
@@ -119,11 +116,13 @@ def main():
                 pd.Series({**current_metrics, **parameters}))
             
         else:
+            # Use the previously trained model as the current model
             st.write("You trained this model before! Retrieving from cache.")
             model_dict["current_model"] = model_dict[model_name]["model"]
             
     
     if model_dict["current_model"]:
+        ### Add information about the trained model
         st.markdown("## You have a trained model:")
         st.write(model_dict["current_model"])
         
@@ -144,7 +143,7 @@ def main():
                       unsafe_allow_html=True)
         col2.table(cached["performance"]["confusions"][1])
         
-    # Look at all past model performances 
+    # Look at model performances for previously trained models 
     past = st.beta_expander("Trained Model Performances", False)
     def highlight_best(x):
         x2 = pd.DataFrame(index=x.index, columns=x.columns)
@@ -154,13 +153,17 @@ def main():
     if not cached["past_metrics"].empty:
         past.header("You've Trained These Models:")
         past_metrics = (cached["past_metrics"].style.set_precision(4)
-                                              .apply(highlight_best, axis=None)
-                                              .format(None, na_rep="None"))
+            .apply(highlight_best, axis=None).format(None, na_rep="None"))
         past.dataframe(past_metrics)
     
     
 @st.cache(suppress_st_warning=True, show_spinner=False)
 def load_data():
+    """ 
+    Load the cleaned weather data from the csv. If the data hasn't been 
+    downloaded, prompt a download. If it has been downloaded but not cleaned, 
+    run the cleaning script. 
+    """
     # Load the data from the sklearn package
     data_path = os.path.join("WeatherData", "cleaned_weather.csv")
     if not os.path.exists(data_path):
@@ -188,6 +191,7 @@ def load_data():
     
 @st.cache(allow_output_mutation=True)
 def cached_values():
+    """ Save variables between runs """
     with open("./help_text.txt") as f:
         help_text = f.readlines()
     metric_idx = ["Train F1", "Test F1", "Train AUC", "Test AUC",
@@ -210,6 +214,9 @@ def get_models():
 
 
 def evaluate_model(model, data):
+    """
+    Evaluate the random forest model on traning and testing data. 
+    """
     y_hat_trn = model.predict(data["X_train"])
     y_hat_tst = model.predict(data["X_test"])
     
