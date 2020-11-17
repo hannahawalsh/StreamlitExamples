@@ -14,7 +14,11 @@ SEED = 101
 
 
 def main():
-    
+    """
+    This is the main body of the app and is what is run when the script is
+    called from the terminal. It contains all the layout information and
+    executes the appropriate computations.
+    """
     ### Set up our side bar
     st.sidebar.title("Model Hyperparameters")
     help_button = st.sidebar.button(label="Help")

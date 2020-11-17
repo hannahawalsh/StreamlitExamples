@@ -1,12 +1,11 @@
 """
-This is a simple app demonstrating some important and interesting features of
-streamlit. To run, type `streamlit run Data_Explorer.py` in your terminal.
+This is an example of using Streamlit for data exploration.
+It uses the built-in sklearn wine data set.
 """
+
 ### Imports
 import streamlit as st
 import pandas as pd
-import numpy as np
-import altair as alt
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_wine
@@ -34,13 +33,10 @@ def main():
 
     # Main page: use containers
     data_container = st.beta_container()
-    # description = st.beta_expander("Data Description", expanded=False)
     filter_container = st.beta_expander("Data Filtering", expanded=False)
     corrolation_map = st.beta_expander("Correlation Plot", expanded=True)
     distribution_plot = st.beta_expander("Distribution Plot", expanded=True)
     comparison_plot = st.beta_expander("Comparison Plot", expanded=True)
-    
-
     description = st.beta_expander("Data Description", expanded=False)
     description.write(return_description())
 
@@ -54,7 +50,6 @@ def main():
     ## To sidebar
     display_options.title("Display Options")
     colr_data = display_options.checkbox("Highlight data based on class")
-    # display_options.write("Sort by Column:")
     sort_cont = display_options.beta_columns([4, 3])
     sort_col = sort_cont[0].selectbox("Sort:", ["---"] + data_cols,
                                       key="sort_by")
@@ -169,6 +164,7 @@ def main():
 ### Cached functions
 @st.cache(allow_output_mutation=True)
 def load_data():
+    """ Load and shuffle the sklearn wine data set. """
     data = load_wine(as_frame=True).frame
     return data.sample(frac=1, replace=False,
                        random_state=101).reset_index(drop=True)
@@ -189,12 +185,10 @@ def get_filters():
 def get_filtered_data():
     return {"data": None}
 
-### Plot functions
-
-
 
 ### Other Functions
 def exclude(array, exclude_things):
+    """ For a given array, return that array without the 'exclude_things'"""
     if not isinstance(exclude_things, list):
         exclude_things = [exclude_things]
     return [x for x in array if x not in exclude_things]
@@ -211,6 +205,7 @@ def get_filter_update(subdict, filter_exp, filter_num):
     return subdict
 
 def get_filter_expression(filter_dict, col):
+    """ Get the expresion for the filter """
     defined = [k for k, v in filter_dict.items() if v and k!="active"]
     return " and ".join([f"{col} {k} {round(filter_dict[k], 2)}" for
                          k in defined])
