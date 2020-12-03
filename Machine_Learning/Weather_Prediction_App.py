@@ -37,7 +37,7 @@ def main():
 
     ### Set up our main page 
     # Title
-    html_title = ("<h1 style='text-align: center; font-size: {size}em; "
+    html_title = ("<h1 style='text-align: center; font-size: 3.0 em; "
                   "font-family: Arial; color: DodgerBlue;'> Australian Rain "
                   "Predictions </h1>")
     st.markdown(html_title, unsafe_allow_html=True)
@@ -62,18 +62,18 @@ def main():
     b1, b2, _, _ = data_cont.beta_columns(4)
     minus_rows = b1.button("Fewer Rows")
     plus_rows = b2.button("More Rows")
-    if not cached["display_data"]:
-        cached["display_data"]["df"] = pd.concat([data["y_train"].head(5),
+    if cached["display_data"] is None:
+        cached["display_data"] = pd.concat([data["y_train"].head(5),
             data["X_train"].head(5)], axis=1).reset_index(drop=True)
     elif minus_rows:
-        L = max(1, len(cached["display_data"]["df"]) - 1)
-        cached["display_data"]["df"] = pd.concat([data["y_train"].head(L),
+        L = max(1, len(cached["display_data"]) - 1)
+        cached["display_data"] = pd.concat([data["y_train"].head(L),
             data["X_train"].head(L)], axis=1).reset_index(drop=True)
     elif plus_rows:
-        L = len(cached["display_data"]["df"]) + 1
-        cached["display_data"]["df"] = pd.concat([data["y_train"].head(L),
+        L = len(cached["display_data"]) + 1
+        cached["display_data"] = pd.concat([data["y_train"].head(L),
             data["X_train"].head(L)], axis=1).reset_index(drop=True)
-    sty_df = cached["display_data"]["df"].style.set_precision(2)
+    sty_df = cached["display_data"].style.set_precision(2)
     table_spot.table(sty_df)
 
     # Add help information for hyperparameters 
@@ -138,30 +138,63 @@ def main():
         st.subheader("Confusion Matrix")
         st.write("How did the model get it wrong?")
         col1, col2 = st.beta_columns(2)
+        txt = ["*Predicted too much rain*",  "*Didn't predict enough rain*"]
         
-        # col1.markdown("#### **Training Data**")
         col1.markdown("<h3 style='text-align: center'>Training Data</h3>",
                       unsafe_allow_html=True)
-        col1.table(cached["performance"]["confusions"][0])
+        con1 = cached["performance"]["confusions"][0]
+        col1.table(con1)
+        col1.markdown(txt[0] if con1.iloc[0][1] < con1.iloc[1][0] else txt[1])
+        
         col2.markdown("<h3 style='text-align: center'>Testing Data</h3>",
                       unsafe_allow_html=True)
-        col2.table(cached["performance"]["confusions"][1])
+        con2 = cached["performance"]["confusions"][1]
+        col2.table(con2)
+        col2.markdown(txt[0] if con2.iloc[0][1] < con2.iloc[1][0] else txt[1])
         
     # Look at model performances for previously trained models 
     past = st.beta_expander("Trained Model Performances", False)
+    if not cached["past_metrics"].empty:
+        past.header("You've Trained These Models:")
+        past.dataframe(format_model_df(cached["past_metrics"], 3))
+
+
+def format_model_df(df, precision=3):
+    """ Format the data frame containing the previously trained models. """
     def highlight_best(x):
+        """ Highlight column with best test F1 score. """
         x2 = pd.DataFrame(index=x.index, columns=x.columns)
         max_col = x.loc["Test F1"].astype(float).idxmax()
         x2[max_col] = "background-color: yellow"
         return x2.fillna("background-color: white")
-    if not cached["past_metrics"].empty:
-        past.header("You've Trained These Models:")
-        past_metrics = (cached["past_metrics"].style.set_precision(4)
-            .apply(highlight_best, axis=None).format(None, na_rep="None"))
-        past.dataframe(past_metrics)
+
+    def change_dtypes(df):
+        """ Change the type of each row """
+        int_cols = ["n_estimators", "max_depth", "min_samples_split"]
+        # str_cols = ["max_features", "class_weight"]
+
+        df_t = df.T.copy()
+        for col in df_t.columns:
+            if col in int_cols:
+                df_t[col] = df_t[col].astype(int)
+            # elif col in str_cols:
+            #     df_t[col] = df_t[col].astype(object)
+            elif col == "max_features":
+                df_t[col].fillna("All", inplace=True)
+            elif col == "class_weight":
+                df_t[col].fillna("not", inplace=True)
+            else:
+                df_t[col] = df_t[col].astype(float)
+        return df_t.T.copy()
+    
+    pd.set_option("display.precision", precision)
+    styled = (change_dtypes(df).style.apply(highlight_best, axis=None)
+                               .format(None, na_rep="None"))
+    return styled
+            
     
     
-@st.cache(suppress_st_warning=True, show_spinner=False)
+@st.cache(persist=True, suppress_st_warning=True, show_spinner=False)
 def load_data():
     """ 
     Load the cleaned weather data from the csv. If the data hasn't been 
@@ -193,7 +226,7 @@ def load_data():
     return data_dict
 
     
-@st.cache(allow_output_mutation=True)
+@st.cache(persist=True, allow_output_mutation=True)
 def cached_values():
     """ Save variables between runs """
     with open("./help_text.txt") as f:
@@ -202,7 +235,7 @@ def cached_values():
                   "n_estimators", "max_depth", "min_samples_split",
                   "max_features", "class_weight"]
     
-    values = {"display_data": {},
+    values = {"display_data": None,
               "help_text": "".join(help_text),
               "help_text_state": {"show": False},
               "performance": {"metrics": None, "confusions": None},
@@ -211,7 +244,7 @@ def cached_values():
     return values
     
     
-@st.cache(allow_output_mutation=True)
+@st.cache(persist=True, allow_output_mutation=True)
 def get_models():
     return {"current_model": None}
 
