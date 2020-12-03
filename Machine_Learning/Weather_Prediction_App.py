@@ -229,7 +229,7 @@ def load_data():
 @st.cache(persist=True, allow_output_mutation=True)
 def cached_values():
     """ Save variables between runs """
-    with open("./help_text.txt") as f:
+    with open("./raw/help_text.txt") as f:
         help_text = f.readlines()
     metric_idx = ["Train F1", "Test F1", "Train AUC", "Test AUC",
                   "n_estimators", "max_depth", "min_samples_split",
