@@ -45,9 +45,9 @@ def main():
     
     # Add content 
     past_values = cached_function()
-    past_values.append(radio)
-    content_spot.markdown(f"<p style='color: {color_picker};'> Past Values of "
-                          f"the Radio Selector: \n{past_values} </p>", 
+    past_values.append(True)
+    content_spot.markdown(f"<p style='color: {color_picker};'> You've taken "
+                          f"{len(past_values)} actions </p>", 
                           unsafe_allow_html=True)
 
 

@@ -19,6 +19,10 @@ def main():
     called from the terminal. It contains all the layout information and
     executes the appropriate computations.
     """
+    ### Configure the page 
+    st.set_page_config(page_title="Explore Wine Data", page_icon="🍷",
+                       layout="wide")
+    
     ### Load the data
     data = load_data()
     data_cols = list(data.columns)
