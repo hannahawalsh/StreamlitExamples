@@ -141,7 +141,7 @@ def main():
     Style.num_rows = num_rows
     Style.colored = True if colr_data else False
     Style.sort_column = sort_col
-    Style.ascending = True if ascending == "Low to High" else False
+    Style.ascending = True if ascending == "Low->High" else False
     data_container.write(f"Dataframe contains {filtered.shape[0]} data points")
     # data_container.table(Style().style(filtered))
     data_container.table(Style().style(filtered))
