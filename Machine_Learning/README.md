@@ -6,8 +6,7 @@ Streamlit is great for visualizing data. That's its obvious use case. But it can
 
 This documentation goes into extreme detail about how this app was built. It is meant as a learning and teaching tool. I encourage you to play around with it first! See below for how to run this app on your machine.
 
- ![](./raw/weather_app_overview.mp4)
-
+![](./raw/overview.gif)
 
 
 ## How to run the app on your computer
@@ -51,11 +50,11 @@ The app should open in your browser and you can play around with it! Note, the f
 
 Uses the Australian weather data set from [Kaggle](https://www.kaggle.com/jsphyg/weather-dataset-rattle-package), we attempt to predict whether or not it will rain the next day at a given location. There is a script that cleans the data, but this documentation won't go over that.    
 
-![](./raw/weather_app_hyperparameters.mp4)
+![](./raw/hyperparameters.gif)
 
 The Streamlit app allows you to set hyperparameters and then train a [random forest](https://scikit-learn.org/stable/modules/ensemble.html#forest) model. Caching is used to store the result so that various runs can be compared. This is just a manual grid search - the task could be done much more efficiently by an algorithm - but this is just for the purpose of demonstrating some important and interesting features of the Streamlit package.
 
-![](./raw/weather_app_models.mp4)
+![](./raw/models.gif)
 
 
 
@@ -309,7 +308,7 @@ table_spot.table(sty_df)
 
 Hooray! Now you (hopefully) understand what the containers do. They are extremely helpful for when we want to insert elements out of order. And columns help us organize our app in a more intuitive manner.
 
-![](./raw/weather_app_rows.mp4)
+![](./raw/rows.gif)
 
 
 
@@ -500,4 +499,24 @@ model_dict[model_name] = {"model": model, "parameters": parameters}
 ```
 
 It's that simple!
+
+### The help button
+
+Now, you might have noticed that when the help button is clicked, the help text stays shown until the Close button is clicked. This is counter to what we've learned about buttons. 
+
+That's because we use the button press of "Help" to change a cached variable, not a display option. The script then reads if the help text state is set to True, and if so, displays the text. The help text state is only set to False if the Close button is clicked.
+
+```python
+close_help = close_help_spot.button("Close")
+if help_button:
+    cached["help_text_state"]["show"] = True
+if close_help:
+    cached["help_text_state"]["show"] = False
+if cached["help_text_state"]["show"]:
+    umbrella.empty()
+    help_text_spot.markdown(cached["help_text"])
+else:
+    close_help_spot.empty()
+```
+![](./raw/help_button.gif)
 
